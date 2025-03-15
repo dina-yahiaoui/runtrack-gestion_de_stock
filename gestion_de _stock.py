@@ -7,7 +7,7 @@ import csv
 conn = mysql.connector.connect(
     host="localhost",
     user="root",
-    password="root",
+    password="rootgi",
     database="store"
 )
 cursor = conn.cursor()
@@ -33,32 +33,39 @@ CREATE TABLE IF NOT EXISTS product (
 """)
 conn.commit()
 
-# Interface graphique
+# Interface graphique améliorée
 class StockManager:
     def __init__(self, root):
         self.root = root
         self.root.title("Gestion de Stock")
+        self.root.geometry("800x500")
         
-        self.tree = ttk.Treeview(root, columns=("ID", "Nom", "Description", "Prix", "Quantité", "Catégorie"), show="headings")
-        self.tree.heading("ID", text="ID")
-        self.tree.heading("Nom", text="Nom")
-        self.tree.heading("Description", text="Description")
-        self.tree.heading("Prix", text="Prix")
-        self.tree.heading("Quantité", text="Quantité")
-        self.tree.heading("Catégorie", text="Catégorie")
-        self.tree.pack()
+        # Cadre principal
+        frame = tk.Frame(root, padx=10, pady=10)
+        frame.pack(fill="both", expand=True)
+        
+        # Tableau des produits
+        self.tree = ttk.Treeview(frame, columns=("ID", "Nom", "Description", "Prix", "Quantité", "Catégorie"), show="headings")
+        for col in ("ID", "Nom", "Description", "Prix", "Quantité", "Catégorie"):
+            self.tree.heading(col, text=col)
+            self.tree.column(col, width=100, anchor="center")
+        self.tree.pack(fill="both", expand=True)
+        
+        # Boutons
+        button_frame = tk.Frame(root)
+        button_frame.pack(pady=10)
+        
+        self.btn_add = ttk.Button(button_frame, text="Ajouter Produit", command=self.add_product)
+        self.btn_add.grid(row=0, column=0, padx=5)
+        
+        self.btn_delete = ttk.Button(button_frame, text="Supprimer Produit", command=self.delete_product)
+        self.btn_delete.grid(row=0, column=1, padx=5)
+        
+        self.btn_export = ttk.Button(button_frame, text="Exporter CSV", command=self.export_csv)
+        self.btn_export.grid(row=0, column=2, padx=5)
         
         self.load_data()
-        
-        self.btn_add = tk.Button(root, text="Ajouter Produit", command=self.add_product)
-        self.btn_add.pack()
-        
-        self.btn_delete = tk.Button(root, text="Supprimer Produit", command=self.delete_product)
-        self.btn_delete.pack()
-        
-        self.btn_export = tk.Button(root, text="Exporter CSV", command=self.export_csv)
-        self.btn_export.pack()
-        
+    
     def load_data(self):
         for row in self.tree.get_children():
             self.tree.delete(row)
@@ -74,6 +81,7 @@ class StockManager:
     def add_product(self):
         new_window = tk.Toplevel(self.root)
         new_window.title("Ajouter un Produit")
+        
         tk.Label(new_window, text="Nom").grid(row=0, column=0)
         entry_name = tk.Entry(new_window)
         entry_name.grid(row=0, column=1)
@@ -113,7 +121,7 @@ class StockManager:
             self.load_data()
             new_window.destroy()
         
-        tk.Button(new_window, text="Sauvegarder", command=save_product).grid(row=5, column=1)
+        ttk.Button(new_window, text="Sauvegarder", command=save_product).grid(row=5, column=1)
     
     def delete_product(self):
         selected_item = self.tree.selection()
